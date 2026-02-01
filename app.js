@@ -12,9 +12,6 @@ app.use(express.json());
 // Habilitar CORS
 app.use(cors());
 
-// Servir archivos estáticos de la carpeta uploads
-//app.use(express.static('uploads'));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // <--- reemplaza aquí
 
 // Importar rutas
 const authRoutes = require('./routes/auth');

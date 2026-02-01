@@ -11,7 +11,9 @@ const AlertaSchema = new Schema({
     },
     // Arreglo de imágenes asociadas a la alerta (pueden ser rutas locales o URLs)
     img: [{
-        type: String // Cada imagen es una cadena (ruta o URL)
+           data: Buffer,           // Datos binarios de la imagen
+           mimetype: String,       // Tipo MIME (image/png, image/jpeg, etc.)
+           nombre: String          // Nombre original del archivo
     }],
     // Ubicación geográfica de la alerta
     ubicacion: {

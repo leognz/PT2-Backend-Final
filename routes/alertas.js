@@ -8,18 +8,8 @@ const validarJWT = require('../middleware/validar-jwt');
 const multer = require('multer');
 
 // Configuración de almacenamiento para imágenes con multer
-const storage = multer.diskStorage({
-    // Carpeta donde se guardarán las imágenes subidas
-    destination: 'uploads/',
-    // Define el nombre del archivo: un sufijo único + nombre original
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
-    }
-});
-
-// Inicializa multer con la configuración de almacenamiento
-const upload = multer({ storage });
+// Usar memory storage para procesar imágenes en memoria y guardarlas en MongoDB
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Crea el router de Express
 const router = Router();

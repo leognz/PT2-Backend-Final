@@ -60,16 +60,37 @@ const obtenerAlertasPorUsuario = async (req, res) => {
         // Mapear y convertir imágenes a base64
         const resultado = filtradas.map(alerta => {
             const alertaObj = alerta.toObject();
-            alertaObj.img = (alerta.img || []).map(img => ({
-                data: `data:${img.mimetype};base64,${img.data.toString('base64')}`,
-                nombre: img.nombre
-            }));
+            alertaObj.img = (alerta.img || []).map(img => {
+                try {
+                    // Convertir Buffer a base64
+                    let base64Data = '';
+                    if (img.data && img.data.type === 'Buffer' && img.data.data) {
+                        // Formato serializado de Mongoose
+                        base64Data = Buffer.from(img.data.data).toString('base64');
+                    } else if (img.data instanceof Buffer) {
+                        // Buffer directo
+                        base64Data = img.data.toString('base64');
+                    } else if (typeof img.data === 'string') {
+                        // Ya es string (fallback)
+                        base64Data = img.data;
+                    }
+
+                    return {
+                        data: `data:${img.mimetype || 'image/jpeg'};base64,${base64Data}`,
+                        nombre: img.nombre
+                    };
+                } catch (err) {
+                    console.error('Error al convertir imagen a base64:', err);
+                    return { data: '', nombre: img.nombre };
+                }
+            });
             return alertaObj;
         });
 
         res.json(resultado);
     } catch (error) {
-        res.status(500).json({ msg: 'Error al obtener alertas', error });
+        console.error('Error al obtener alertas:', error);
+        res.status(500).json({ msg: 'Error al obtener alertas', error: error.message });
     }
 };
 
@@ -83,14 +104,31 @@ const obtenerAlertaPorId = async (req, res) => {
         
         const alertaObj = alerta.toObject();
         // Convertir imágenes Buffer a Base64 para enviar al frontend
-        alertaObj.img = alerta.img.map(img => ({
-            data: `data:${img.mimetype};base64,${img.data.toString('base64')}`,
-            nombre: img.nombre
-        }));
+        alertaObj.img = (alerta.img || []).map(img => {
+            try {
+                let base64Data = '';
+                if (img.data && img.data.type === 'Buffer' && img.data.data) {
+                    base64Data = Buffer.from(img.data.data).toString('base64');
+                } else if (img.data instanceof Buffer) {
+                    base64Data = img.data.toString('base64');
+                } else if (typeof img.data === 'string') {
+                    base64Data = img.data;
+                }
+
+                return {
+                    data: `data:${img.mimetype || 'image/jpeg'};base64,${base64Data}`,
+                    nombre: img.nombre
+                };
+            } catch (err) {
+                console.error('Error al convertir imagen a base64:', err);
+                return { data: '', nombre: img.nombre };
+            }
+        });
         
         res.json(alertaObj);
     } catch (error) {
-        res.status(500).json({ msg: 'Error al obtener la alerta', error });
+        console.error('Error al obtener la alerta:', error);
+        res.status(500).json({ msg: 'Error al obtener la alerta', error: error.message });
     }
 };
 
